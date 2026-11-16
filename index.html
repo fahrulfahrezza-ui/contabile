@@ -145,10 +145,6 @@
                     <i data-lucide="calendar" class="w-3.5 h-3.5 text-cyan-600"></i>
                     <span id="current-month-label">Periode Ini</span>
                 </span>
-                <button type="button" onclick="openResetModal()" class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-rose-600 bg-white hover:bg-rose-50 border border-cyan-200 hover:border-rose-300 px-3 py-2 rounded-xl transition-all" title="Hapus semua data dan mulai dari nol">
-                    <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
-                    <span>Reset Data</span>
-                </button>
             </div>
         </div>
     </header>
@@ -681,28 +677,6 @@
                     </button>
                 </div>
             </form>
-        </div>
-    </div>
-
-    <!-- Modal Reset / Mulai dari Nol -->
-    <div id="reset-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/45 backdrop-blur-sm p-4">
-        <div class="modal-panel bg-white rounded-2xl max-w-md w-full p-6 shadow-[0_12px_40px_rgba(244,63,94,0.18)] border-2 border-rose-300 modal-enter">
-            <div class="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-300 text-rose-600 flex items-center justify-center mb-4">
-                <i data-lucide="rotate-ccw" class="w-6 h-6"></i>
-            </div>
-            <h3 class="text-lg font-bold text-slate-900">Hapus Semua Data & Mulai dari Nol?</h3>
-            <p class="text-sm text-slate-500 mt-1 leading-relaxed">
-                Seluruh riwayat transaksi, catatan piutang, dan saldo saat ini akan dikosongkan ke Rp 0 agar kamu bisa mulai mencatat keuanganmu sendiri.
-            </p>
-            <div class="mt-6 flex flex-col gap-2.5">
-                <button type="button" onclick="startFromZero()" class="w-full py-3 px-4 bg-rose-600 hover:bg-rose-500 text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-[0_4px_16px_rgba(244,63,94,0.3)] transition-all flex items-center justify-center gap-2">
-                    <i data-lucide="trash-2" class="w-4 h-4"></i>
-                    <span>Ya, Kosongkan Semua Data (Rp 0)</span>
-                </button>
-                <button type="button" onclick="closeResetModal()" class="w-full py-2.5 px-4 text-slate-500 hover:text-slate-800 font-medium text-xs sm:text-sm rounded-xl transition-colors mt-1">
-                    Batal
-                </button>
-            </div>
         </div>
     </div>
 
@@ -2337,35 +2311,6 @@
             saveState();
             renderAll();
             showToast('Pos Dihapus', `Pos "${cat.name}" berhasil dihapus.`, 'info');
-        }
-
-        function openResetModal() {
-            const modal = document.getElementById('reset-modal');
-            if (modal) {
-                modal.classList.remove('hidden');
-                modal.classList.add('flex');
-            }
-        }
-
-        function closeResetModal() {
-            const modal = document.getElementById('reset-modal');
-            if (modal) {
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
-            }
-        }
-
-        function startFromZero() {
-            state.categories = JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
-            state.transactions = [];
-            state.selectedExpenseCategoryId = 'makan';
-            state.selectedRecapMonth = getCurrentMonthKey();
-            state.historyOnlySelectedMonth = false;
-            globalBannerDismissed = false;
-            saveState();
-            closeResetModal();
-            renderAll();
-            showToast('Data Dikosongkan', 'Semua saldo dan riwayat direset ke Rp 0. Siap mulai mencatat!', 'success');
         }
 
         // ==========================================
