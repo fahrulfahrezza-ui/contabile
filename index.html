@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DompetKu - Cyber Neon Finance & Catatan Piutang</title>
+    <title>DompetKu - Cyber Neon Finance & Catatan Pinjaman & Utang</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
@@ -107,7 +107,8 @@
             #summary-income,
             #summary-expense,
             #summary-savings,
-            #summary-receivables {
+            #summary-receivables,
+            #summary-payables {
                 font-size: clamp(0.625rem, 3.4vw, 0.875rem);
             }
             #recap-month-select {
@@ -136,7 +137,7 @@
                             CYBER NEON
                         </span>
                     </div>
-                    <p class="text-[11px] font-medium text-slate-500 mt-0.5 truncate">Atur pos keuangan, batas belanja & catatan piutang tanpa ribet</p>
+                    <p class="text-[11px] font-medium text-slate-500 mt-0.5 truncate">Atur pos keuangan, batas belanja & catatan pinjaman tanpa ribet</p>
                 </div>
             </div>
 
@@ -168,8 +169,8 @@
             </div>
         </div>
 
-        <!-- 1. Ringkasan Keuangan Atas (5 Kartu Utama Cyber Biru Muda Neon di Atas Putih) -->
-        <section class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+        <!-- 1. Ringkasan Keuangan Atas (6 Kartu Utama Cyber Biru Muda Neon di Atas Putih) -->
+        <section class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-6 gap-3.5">
             <!-- Kartu 1: Sisa Uang Aktif (Hero Neon Cyan) -->
             <div class="col-span-2 lg:col-span-1 bg-gradient-to-br from-cyan-50 via-white to-sky-50 rounded-2xl p-4 sm:p-5 border-2 border-cyan-400 shadow-[0_0_26px_rgba(34,211,238,0.26)] relative overflow-hidden flex flex-col justify-between">
                 <div class="absolute -right-8 -top-8 w-28 h-28 bg-cyan-300/25 rounded-full blur-2xl pointer-events-none"></div>
@@ -244,6 +245,20 @@
                         </button>
                     </div>
                     <p id="summary-receivables-sub" class="text-[11px] text-slate-500 mt-1.5">Belum ada uang dipinjam orang</p>
+                </div>
+            </div>
+
+            <!-- Kartu 6: Utang (Dipinjam Saya) -->
+            <div class="cyber-card rounded-2xl p-4 sm:p-5 border-amber-200 hover:border-amber-400 transition-all flex flex-col justify-between">
+                <div class="flex items-center justify-between gap-2">
+                    <span class="text-[11px] font-bold text-amber-700 uppercase tracking-wider">Utang (Dipinjam Saya)</span>
+                    <div class="w-8 h-8 rounded-xl bg-amber-50 border border-amber-300 flex items-center justify-center text-amber-600 shrink-0">
+                        <i data-lucide="handshake" class="w-4 h-4"></i>
+                    </div>
+                </div>
+                <div>
+                    <h2 id="summary-payables" class="text-sm sm:text-2xl font-cyber-num font-bold text-amber-600 tracking-tight mt-3">Rp 0</h2>
+                    <p id="summary-payables-sub" class="text-[11px] text-slate-500 mt-1.5">Belum ada pinjaman aktif</p>
                 </div>
             </div>
         </section>
@@ -383,6 +398,28 @@
             </div>
         </section>
 
+        <!-- Daftar Utang Aktif (Rincian Pinjaman Saya) -->
+        <section id="active-creditors-section" class="cyber-card rounded-2xl p-5 sm:p-6 border-amber-200">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-amber-50 border border-amber-300 text-amber-600 flex items-center justify-center shrink-0">
+                        <i data-lucide="handshake" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-900 text-base">Daftar Utang Aktif (Saya yang Pinjam)</h3>
+                        <p class="text-xs text-slate-500">Pantau sisa pinjamanmu dan catat cicilan atau pelunasan</p>
+                    </div>
+                </div>
+                <span id="creditors-count-badge" class="self-start sm:self-auto text-xs font-cyber-num font-bold bg-amber-50 text-amber-700 border border-amber-300 px-3 py-1 rounded-full">
+                    0 Pinjaman Aktif
+                </span>
+            </div>
+
+            <div id="creditors-list-container">
+                <!-- Diisi otomatis via JS -->
+            </div>
+        </section>
+
         <!-- 5. Grid Utama Bawah: Form Catat Cepat & Riwayat Transaksi -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-1">
 
@@ -394,7 +431,7 @@
                 </h3>
 
                 <form id="transaction-form" onsubmit="handleAddTransaction(event)" class="space-y-4">
-                    <!-- Pilihan 5 Jenis Transaksi -->
+                    <!-- Pilihan Jenis Transaksi -->
                     <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5 p-1.5 bg-slate-100/90 border border-cyan-200/80 rounded-xl">
                         <button type="button" id="tab-type-expense" onclick="setFormType('expense')"
                             class="flex items-center justify-center gap-1.5 py-2 px-2 text-xs font-bold rounded-lg bg-rose-50 text-rose-700 border border-rose-400 transition-all">
@@ -410,6 +447,16 @@
                             class="flex items-center justify-center gap-1.5 py-2 px-2 text-xs font-semibold rounded-lg text-slate-600 hover:text-cyan-700 transition-all">
                             <i data-lucide="badge-check" class="w-3.5 h-3.5 shrink-0"></i>
                             <span>Pelunasan Piutang</span>
+                        </button>
+                        <button type="button" id="tab-type-loan_received" onclick="setFormType('loan_received')"
+                            class="flex items-center justify-center gap-1.5 py-2 px-2 text-xs font-semibold rounded-lg text-slate-600 hover:text-cyan-700 transition-all">
+                            <i data-lucide="handshake" class="w-3.5 h-3.5 shrink-0"></i>
+                            <span>Pinjam Uang</span>
+                        </button>
+                        <button type="button" id="tab-type-loan_returned" onclick="setFormType('loan_returned')"
+                            class="flex items-center justify-center gap-1.5 py-2 px-2 text-xs font-semibold rounded-lg text-slate-600 hover:text-cyan-700 transition-all">
+                            <i data-lucide="badge-check" class="w-3.5 h-3.5 shrink-0"></i>
+                            <span>Bayar Utang</span>
                         </button>
                         <button type="button" id="tab-type-savings" onclick="setFormType('savings')"
                             class="flex items-center justify-center gap-1.5 py-2 px-2 text-xs font-semibold rounded-lg text-slate-600 hover:text-cyan-700 transition-all">
@@ -445,6 +492,17 @@
                         <p class="text-[11px] text-slate-500">Uang keluar sementara dari Sisa Uang Aktif & tercatat di Piutang.</p>
                     </div>
 
+                    <!-- Area Dinamis: Pinjaman Saya -->
+                    <div id="loan-received-wrapper" class="hidden space-y-2">
+                        <div>
+                            <label for="tx-lender-name" class="block text-xs font-semibold text-amber-700 mb-1.5">Nama Pemberi Pinjaman <span class="text-rose-500">*</span></label>
+                            <input type="text" id="tx-lender-name" list="existing-lenders-list" placeholder="Misal: Budi, Rina, Andi" maxlength="30"
+                                class="w-full px-3.5 py-2.5 text-sm font-semibold text-slate-900 placeholder-slate-400 bg-white border border-amber-300 rounded-xl focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-400/25 transition-all">
+                        </div>
+                        <datalist id="existing-lenders-list"></datalist>
+                        <p class="text-[11px] text-slate-500">Uang masuk ke Sisa Uang Aktif dan tercatat sebagai utang yang perlu dibayar.</p>
+                    </div>
+
                     <!-- Area Dinamis 3: Pelunasan Piutang (Jika tipe = loan_repaid) -->
                     <div id="loan-repaid-wrapper" class="hidden space-y-2.5">
                         <div>
@@ -460,6 +518,23 @@
                                 class="w-full px-3.5 py-2 text-sm text-slate-900 placeholder-slate-400 bg-white border border-cyan-300 rounded-xl focus:outline-none focus:border-teal-500">
                         </div>
                         <p id="repay-debt-info" class="text-[11px] font-medium text-teal-700">Nominal otomatis terisi sesuai sisa hutangnya (bisa diubah jika dicicil).</p>
+                    </div>
+
+                    <!-- Area Dinamis: Pembayaran Utang Saya -->
+                    <div id="loan-returned-wrapper" class="hidden space-y-2.5">
+                        <div>
+                            <label for="tx-return-select" class="block text-xs font-semibold text-amber-700 mb-1.5">Pilih Pemberi Pinjaman</label>
+                            <select id="tx-return-select" onchange="handleReturnLenderSelect()"
+                                class="w-full px-3.5 py-2.5 text-sm font-semibold text-slate-900 bg-white border border-amber-300 rounded-xl focus:outline-none focus:border-amber-500 transition-all">
+                                <!-- Diisi otomatis via JS -->
+                            </select>
+                        </div>
+                        <div id="return-manual-name-box" class="hidden">
+                            <label for="tx-return-manual-name" class="block text-xs font-semibold text-slate-700 mb-1">Atau Ketik Nama Pemberi Pinjaman</label>
+                            <input type="text" id="tx-return-manual-name" placeholder="Nama orang yang kamu bayar" maxlength="30"
+                                class="w-full px-3.5 py-2 text-sm text-slate-900 placeholder-slate-400 bg-white border border-amber-300 rounded-xl focus:outline-none focus:border-amber-500">
+                        </div>
+                        <p class="text-[11px] font-medium text-amber-700">Nominal otomatis terisi sesuai sisa utang (bisa diubah jika mencicil).</p>
                     </div>
 
                     <!-- Area Dinamis 4: Setor / Tarik Tabungan (Jika tipe = savings) -->
@@ -879,6 +954,8 @@
             let totalSavings = 0;
             let totalLoansGiven = 0;
             let totalLoansRepaid = 0;
+            let totalLoansReceived = 0;
+            let totalLoansReturned = 0;
 
             const activeMonthKey = state.selectedRecapMonth || getCurrentMonthKey();
             const currentRealMonthKey = getCurrentMonthKey();
@@ -893,6 +970,7 @@
             });
 
             const debtorMap = {};
+            const creditorMap = {};
             const monthlyMap = {};
 
             function ensureMonthBucket(mKey) {
@@ -906,6 +984,8 @@
                         savingsNet: 0,
                         loanGiven: 0,
                         loanRepaid: 0,
+                        loanReceived: 0,
+                        loanReturned: 0,
                         netCashFlow: 0,
                         txCount: 0,
                         expenseByCategory: {}
@@ -962,6 +1042,24 @@
                         debtorMap[key] = { name: rawName, lent: 0, repaid: 0, remaining: 0 };
                     }
                     debtorMap[key].repaid += amt;
+                } else if (tx.type === 'loan_received') {
+                    totalLoansReceived += amt;
+                    mBucket.loanReceived += amt;
+                    const rawName = (tx.lender || 'Tanpa Nama').trim();
+                    const key = rawName.toLowerCase();
+                    if (!creditorMap[key]) {
+                        creditorMap[key] = { name: rawName, received: 0, returned: 0, remaining: 0 };
+                    }
+                    creditorMap[key].received += amt;
+                } else if (tx.type === 'loan_returned') {
+                    totalLoansReturned += amt;
+                    mBucket.loanReturned += amt;
+                    const rawName = (tx.lender || 'Tanpa Nama').trim();
+                    const key = rawName.toLowerCase();
+                    if (!creditorMap[key]) {
+                        creditorMap[key] = { name: rawName, received: 0, returned: 0, remaining: 0 };
+                    }
+                    creditorMap[key].returned += amt;
                 }
             });
 
@@ -1005,7 +1103,16 @@
                 .sort((a, b) => b.remaining - a.remaining);
 
             const outstandingReceivables = activeDebtors.reduce((acc, d) => acc + d.remaining, 0);
-            const activeCash = totalIncome - totalExpense - totalSavings - totalLoansGiven + totalLoansRepaid;
+            const activeCreditors = Object.values(creditorMap)
+                .map(c => ({
+                    ...c,
+                    remaining: Math.max(0, c.received - c.returned)
+                }))
+                .filter(c => c.remaining > 0)
+                .sort((a, b) => b.remaining - a.remaining);
+
+            const outstandingPayables = activeCreditors.reduce((acc, c) => acc + c.remaining, 0);
+            const activeCash = totalIncome - totalExpense - totalSavings - totalLoansGiven + totalLoansRepaid + totalLoansReceived - totalLoansReturned;
 
             return {
                 totalIncome,
@@ -1013,11 +1120,15 @@
                 totalSavings,
                 totalLoansGiven,
                 totalLoansRepaid,
+                totalLoansReceived,
+                totalLoansReturned,
                 outstandingReceivables,
+                outstandingPayables,
                 activeCash,
                 expenseByCategory: expenseByCategorySelectedMonth,
                 expenseByCategoryCurrentMonth,
                 activeDebtors,
+                activeCreditors,
                 monthlyMap,
                 sortedMonthKeys
             };
@@ -1200,6 +1311,15 @@
             }
             if (quickRepayBtn) {
                 quickRepayBtn.classList.toggle('hidden', metrics.activeDebtors.length === 0);
+            }
+
+            const payablesEl = document.getElementById('summary-payables');
+            const payablesSubEl = document.getElementById('summary-payables-sub');
+            if (payablesEl) payablesEl.textContent = formatRupiah(metrics.outstandingPayables);
+            if (payablesSubEl) {
+                payablesSubEl.textContent = metrics.activeCreditors.length > 0
+                    ? `Utang ke ${metrics.activeCreditors.length} orang aktif`
+                    : 'Belum ada pinjaman aktif';
             }
         }
 
@@ -1610,6 +1730,102 @@
             `;
         }
 
+        function renderActiveCreditors(metrics) {
+            const container = document.getElementById('creditors-list-container');
+            const badge = document.getElementById('creditors-count-badge');
+            if (!container || !badge) return;
+
+            const creditors = metrics.activeCreditors;
+            badge.textContent = `${creditors.length} Pinjaman Aktif`;
+
+            if (creditors.length === 0) {
+                container.innerHTML = `
+                    <div class="rounded-xl border border-dashed border-amber-200 bg-amber-50/35 p-5 text-center">
+                        <p class="text-xs sm:text-sm font-semibold text-slate-600">Tidak ada utang aktif saat ini.</p>
+                        <p class="text-[11px] text-slate-400 mt-1">Pilih tab <strong class="text-amber-700">Pinjam Uang</strong> di form bawah saat kamu menerima pinjaman.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    ${creditors.map(c => {
+                        const safeNameAttr = escapeHTML(c.name).replace(/'/g, '&#39;');
+                        return `
+                            <div class="rounded-xl border border-amber-200 bg-amber-50/45 p-4 flex flex-col justify-between gap-3">
+                                <div class="flex items-start justify-between gap-2">
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-extrabold text-slate-900 truncate">${escapeHTML(c.name)}</p>
+                                        <p class="text-[11px] font-cyber-num text-slate-500 mt-0.5">
+                                            Pinjam: ${formatRupiah(c.received)}${c.returned > 0 ? ` • Dibayar: ${formatRupiah(c.returned)}` : ''}
+                                        </p>
+                                    </div>
+                                    <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 shrink-0">
+                                        Belum Lunas
+                                    </span>
+                                </div>
+
+                                <div class="flex items-end justify-between gap-2 pt-2 border-t border-amber-200/70">
+                                    <div>
+                                        <span class="text-[10px] font-semibold text-slate-500 block">Sisa Utang</span>
+                                        <span class="text-base font-cyber-num font-extrabold text-amber-700">${formatRupiah(c.remaining)}</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5 shrink-0">
+                                        <button type="button" onclick="openPartialReturn('${safeNameAttr}', ${c.remaining})"
+                                            class="px-2.5 py-1.5 text-[11px] font-bold rounded-lg bg-white hover:bg-amber-100 text-amber-800 border border-amber-300 transition-colors">
+                                            Cicil
+                                        </button>
+                                        <button type="button" onclick="quickReturnFull('${safeNameAttr}', ${c.remaining})"
+                                            class="px-2.5 py-1.5 text-[11px] font-bold rounded-lg bg-amber-600 hover:bg-amber-500 text-white shadow-[0_2px_10px_rgba(217,119,6,0.3)] transition-colors">
+                                            Lunasi
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        function quickReturnFull(lenderName, remainingAmount) {
+            const amount = Number(remainingAmount) || 0;
+            if (amount <= 0) return;
+
+            const txRecord = {
+                id: 'tx_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+                type: 'loan_returned',
+                lender: lenderName,
+                amount: amount,
+                note: 'Pelunasan penuh utang',
+                date: getTodayDateString(),
+                time: getCurrentTimeString()
+            };
+
+            state.transactions.unshift(txRecord);
+            state.selectedRecapMonth = txRecord.date.slice(0, 7);
+            saveState();
+            renderAll();
+            showToast('Utang Lunas!', `Kamu membayar ${formatRupiah(amount)} kepada ${lenderName}.`, 'success');
+        }
+
+        function openPartialReturn(lenderName, remainingAmount) {
+            setFormType('loan_returned');
+            const selectEl = document.getElementById('tx-return-select');
+            const amountInput = document.getElementById('tx-amount');
+            if (selectEl) {
+                selectEl.value = lenderName;
+                handleReturnLenderSelect();
+            }
+            if (amountInput) {
+                amountInput.value = formatDigits(remainingAmount);
+                amountInput.focus();
+            }
+            const formSec = document.getElementById('quick-form-section');
+            if (formSec) formSec.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
         function quickRepayFull(borrowerName, remainingAmount) {
             const amount = Number(remainingAmount) || 0;
             if (amount <= 0) return;
@@ -1675,6 +1891,16 @@
                     submitBtn: 'w-full py-3.5 px-4 bg-teal-600 hover:bg-teal-500 active:scale-[0.99] text-white font-extrabold text-sm rounded-xl shadow-[0_4px_16px_rgba(13,148,136,0.32)] transition-all flex items-center justify-center gap-2 mt-2',
                     submitLabel: 'Simpan Pelunasan Piutang'
                 },
+                loan_received: {
+                    active: 'flex items-center justify-center gap-1.5 py-2 px-2 text-xs font-bold rounded-lg bg-amber-50 text-amber-700 border border-amber-400 shadow-sm transition-all',
+                    submitBtn: 'w-full py-3.5 px-4 bg-amber-600 hover:bg-amber-500 active:scale-[0.99] text-white font-extrabold text-sm rounded-xl shadow-[0_4px_16px_rgba(217,119,6,0.32)] transition-all flex items-center justify-center gap-2 mt-2',
+                    submitLabel: 'Simpan Pinjaman'
+                },
+                loan_returned: {
+                    active: 'flex items-center justify-center gap-1.5 py-2 px-2 text-xs font-bold rounded-lg bg-orange-50 text-orange-700 border border-orange-400 shadow-sm transition-all',
+                    submitBtn: 'w-full py-3.5 px-4 bg-orange-600 hover:bg-orange-500 active:scale-[0.99] text-white font-extrabold text-sm rounded-xl shadow-[0_4px_16px_rgba(234,88,12,0.32)] transition-all flex items-center justify-center gap-2 mt-2',
+                    submitLabel: 'Simpan Pembayaran Utang'
+                },
                 savings: {
                     active: 'flex items-center justify-center gap-1.5 py-2 px-2 text-xs font-bold rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-400 shadow-sm transition-all',
                     submitBtn: 'w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-500 active:scale-[0.99] text-white font-extrabold text-sm rounded-xl shadow-[0_4px_16px_rgba(16,185,129,0.32)] transition-all flex items-center justify-center gap-2 mt-2',
@@ -1687,7 +1913,7 @@
                 }
             };
 
-            const allTypes = ['expense', 'loan_given', 'loan_repaid', 'savings', 'income'];
+            const allTypes = ['expense', 'loan_given', 'loan_repaid', 'loan_received', 'loan_returned', 'savings', 'income'];
             allTypes.forEach(t => {
                 const btn = document.getElementById(`tab-type-${t}`);
                 if (!btn) return;
@@ -1702,6 +1928,8 @@
             document.getElementById('expense-category-wrapper')?.classList.toggle('hidden', type !== 'expense');
             document.getElementById('loan-given-wrapper')?.classList.toggle('hidden', type !== 'loan_given');
             document.getElementById('loan-repaid-wrapper')?.classList.toggle('hidden', type !== 'loan_repaid');
+            document.getElementById('loan-received-wrapper')?.classList.toggle('hidden', type !== 'loan_received');
+            document.getElementById('loan-returned-wrapper')?.classList.toggle('hidden', type !== 'loan_returned');
             document.getElementById('savings-action-wrapper')?.classList.toggle('hidden', type !== 'savings');
             document.getElementById('income-category-wrapper')?.classList.toggle('hidden', type !== 'income');
 
@@ -1714,6 +1942,8 @@
             if (type === 'expense') renderFormExpenseCategories();
             if (type === 'loan_given') populateBorrowersDatalist();
             if (type === 'loan_repaid') populateRepaymentSelect();
+            if (type === 'loan_received') populateLendersDatalist();
+            if (type === 'loan_returned') populateReturnSelect();
             refreshIcons();
         }
 
@@ -1773,6 +2003,20 @@
                 .join('');
         }
 
+        function populateLendersDatalist() {
+            const datalist = document.getElementById('existing-lenders-list');
+            if (!datalist) return;
+            const names = new Set();
+            state.transactions.forEach(tx => {
+                if ((tx.type === 'loan_received' || tx.type === 'loan_returned') && tx.lender) {
+                    names.add(tx.lender.trim());
+                }
+            });
+            datalist.innerHTML = Array.from(names)
+                .map(n => `<option value="${escapeHTML(n)}">`)
+                .join('');
+        }
+
         function populateRepaymentSelect() {
             const selectEl = document.getElementById('tx-repay-select');
             const manualBox = document.getElementById('repay-manual-name-box');
@@ -1808,6 +2052,43 @@
                 const rem = Number(selectedOpt?.getAttribute('data-remaining')) || 0;
                 if (rem > 0 && amountInput) {
                     amountInput.value = formatDigits(rem);
+                }
+            }
+        }
+
+        function populateReturnSelect() {
+            const selectEl = document.getElementById('tx-return-select');
+            const manualBox = document.getElementById('return-manual-name-box');
+            if (!selectEl) return;
+
+            const creditors = calculateMetrics().activeCreditors;
+            if (creditors.length === 0) {
+                selectEl.innerHTML = `<option value="__manual__">-- Ketik Nama Pemberi Pinjaman Manual --</option>`;
+                if (manualBox) manualBox.classList.remove('hidden');
+                return;
+            }
+
+            selectEl.innerHTML = creditors.map(c =>
+                `<option value="${escapeHTML(c.name)}" data-remaining="${c.remaining}">${escapeHTML(c.name)} (Sisa: ${formatRupiah(c.remaining)})</option>`
+            ).join('') + `<option value="__manual__">+ Ketik Nama Lainnya...</option>`;
+
+            handleReturnLenderSelect();
+        }
+
+        function handleReturnLenderSelect() {
+            const selectEl = document.getElementById('tx-return-select');
+            const manualBox = document.getElementById('return-manual-name-box');
+            const amountInput = document.getElementById('tx-amount');
+            if (!selectEl) return;
+
+            const selectedOpt = selectEl.options[selectEl.selectedIndex];
+            if (selectEl.value === '__manual__') {
+                if (manualBox) manualBox.classList.remove('hidden');
+            } else {
+                if (manualBox) manualBox.classList.add('hidden');
+                const remaining = Number(selectedOpt?.getAttribute('data-remaining')) || 0;
+                if (remaining > 0 && amountInput) {
+                    amountInput.value = formatDigits(remaining);
                 }
             }
         }
@@ -1915,6 +2196,30 @@
                 }
                 txRecord.borrower = borrowerName;
                 if (manualInput) manualInput.value = '';
+            } else if (formType === 'loan_received') {
+                const lenderInput = document.getElementById('tx-lender-name');
+                const lenderName = (lenderInput?.value || '').trim();
+                if (!lenderName) {
+                    showToast('Nama Pemberi Pinjaman Kosong', 'Isi nama orang yang meminjamkan uang terlebih dahulu.', 'warning');
+                    lenderInput?.focus();
+                    return;
+                }
+                txRecord.lender = lenderName;
+                if (lenderInput) lenderInput.value = '';
+            } else if (formType === 'loan_returned') {
+                const selectEl = document.getElementById('tx-return-select');
+                const manualInput = document.getElementById('tx-return-manual-name');
+                let lenderName = selectEl ? selectEl.value : '';
+                if (lenderName === '__manual__') {
+                    lenderName = (manualInput?.value || '').trim();
+                }
+                if (!lenderName) {
+                    showToast('Nama Pemberi Pinjaman Kosong', 'Pilih atau ketik nama orang yang kamu bayar.', 'warning');
+                    manualInput?.focus();
+                    return;
+                }
+                txRecord.lender = lenderName;
+                if (manualInput) manualInput.value = '';
             } else if (formType === 'savings') {
                 txRecord.action = state.savingsAction;
             } else if (formType === 'income') {
@@ -1966,6 +2271,10 @@
                 showToast('Pinjaman Dicatat', `${formatRupiah(amount)} dipinjamkan ke ${txRecord.borrower}.`, 'info');
             } else if (formType === 'loan_repaid') {
                 showToast('Pelunasan Dicatat', `${txRecord.borrower} mengembalikan ${formatRupiah(amount)}.`, 'success');
+            } else if (formType === 'loan_received') {
+                showToast('Pinjaman Dicatat', `Kamu menerima ${formatRupiah(amount)} dari ${txRecord.lender}.`, 'info');
+            } else if (formType === 'loan_returned') {
+                showToast('Pembayaran Utang Dicatat', `Kamu membayar ${formatRupiah(amount)} kepada ${txRecord.lender}.`, 'success');
             } else if (formType === 'savings') {
                 const actionLabel = txRecord.action === 'withdraw' ? 'Penarikan tabungan' : 'Setoran tabungan';
                 showToast('Tabungan Diperbarui', `${actionLabel} sebesar ${formatRupiah(amount)} berhasil dicatat.`, 'success');
@@ -1994,7 +2303,9 @@
                 { key: 'income', label: 'Pemasukan' },
                 { key: 'savings', label: 'Tabungan' },
                 { key: 'loan_given', label: 'Kasih Pinjaman' },
-                { key: 'loan_repaid', label: 'Pelunasan' }
+                { key: 'loan_repaid', label: 'Pelunasan Piutang' },
+                { key: 'loan_received', label: 'Pinjam Uang' },
+                { key: 'loan_returned', label: 'Bayar Utang' }
             ];
 
             bar.innerHTML = filters.map(f => {
@@ -2114,6 +2425,22 @@
                     iconStyle = 'bg-teal-50 border-teal-200 text-teal-600';
                     amountText = `+ ${formatRupiah(tx.amount)}`;
                     amountStyle = 'text-teal-600';
+                } else if (tx.type === 'loan_received') {
+                    title = `Pinjam dari ${tx.lender || 'Teman'}${tx.note ? ` • ${tx.note}` : ''}`;
+                    badgeText = 'Pinjam Uang';
+                    badgeStyle = 'bg-amber-50 text-amber-700 border-amber-200';
+                    iconName = 'handshake';
+                    iconStyle = 'bg-amber-50 border-amber-200 text-amber-600';
+                    amountText = `+ ${formatRupiah(tx.amount)}`;
+                    amountStyle = 'text-amber-600';
+                } else if (tx.type === 'loan_returned') {
+                    title = `Bayar utang ke ${tx.lender || 'Teman'}${tx.note ? ` • ${tx.note}` : ''}`;
+                    badgeText = 'Bayar Utang';
+                    badgeStyle = 'bg-orange-50 text-orange-700 border-orange-200';
+                    iconName = 'badge-check';
+                    iconStyle = 'bg-orange-50 border-orange-200 text-orange-600';
+                    amountText = `- ${formatRupiah(tx.amount)}`;
+                    amountStyle = 'text-orange-600';
                 }
 
                 return `
@@ -2335,9 +2662,12 @@
             renderMonthlyRecap(metrics);
             renderEnvelopes(metrics);
             renderActiveDebtors(metrics);
+            renderActiveCreditors(metrics);
             if (state.formType === 'expense') renderFormExpenseCategories();
             if (state.formType === 'loan_given') populateBorrowersDatalist();
             if (state.formType === 'loan_repaid') populateRepaymentSelect();
+            if (state.formType === 'loan_received') populateLendersDatalist();
+            if (state.formType === 'loan_returned') populateReturnSelect();
             renderFilterBar();
             renderTransactions();
             refreshIcons();
