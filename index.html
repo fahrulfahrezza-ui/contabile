@@ -499,8 +499,23 @@
                             <input type="text" id="tx-lender-name" list="existing-lenders-list" placeholder="Misal: Budi, Rina, Andi" maxlength="30"
                                 class="w-full px-3.5 py-2.5 text-sm font-semibold text-slate-900 placeholder-slate-400 bg-white border border-amber-300 rounded-xl focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-400/25 transition-all">
                         </div>
+                        <fieldset class="space-y-2">
+                            <legend class="block text-xs font-semibold text-slate-700">Uang pinjaman digunakan sebagai</legend>
+                            <div class="grid grid-cols-2 gap-2">
+                                <label class="flex items-start gap-2 p-2.5 rounded-xl border border-amber-200 bg-white text-xs text-slate-700 cursor-pointer">
+                                    <input type="radio" name="loan-received-usage" value="active" checked onchange="updateLoanReceivedUsage()"
+                                        class="mt-0.5 accent-amber-600">
+                                    <span><strong class="block">Uang Aktif</strong><span class="text-[10px] text-slate-500">Masuk ke saldo siap pakai</span></span>
+                                </label>
+                                <label class="flex items-start gap-2 p-2.5 rounded-xl border border-amber-200 bg-white text-xs text-slate-700 cursor-pointer">
+                                    <input type="radio" name="loan-received-usage" value="spent" onchange="updateLoanReceivedUsage()"
+                                        class="mt-0.5 accent-amber-600">
+                                    <span><strong class="block">Langsung Dipakai</strong><span class="text-[10px] text-slate-500">Dicatat sebagai pengeluaran</span></span>
+                                </label>
+                            </div>
+                        </fieldset>
                         <datalist id="existing-lenders-list"></datalist>
-                        <p class="text-[11px] text-slate-500">Uang masuk ke Sisa Uang Aktif dan tercatat sebagai utang yang perlu dibayar.</p>
+                        <p class="text-[11px] text-slate-500">Pinjaman tetap tercatat sebagai utang yang perlu dibayar.</p>
                     </div>
 
                     <!-- Area Dinamis 3: Pelunasan Piutang (Jika tipe = loan_repaid) -->
@@ -813,6 +828,7 @@
             selectedExpenseCategoryId: 'makan',
             savingsAction: 'deposit',
             incomeSource: 'Uang Saku / Gaji',
+            loanReceivedUsage: 'active',
             historyFilter: 'all',
             historyOnlySelectedMonth: false,
             selectedRecapMonth: '',
@@ -955,6 +971,8 @@
             let totalLoansGiven = 0;
             let totalLoansRepaid = 0;
             let totalLoansReceived = 0;
+            let totalLoansReceivedActive = 0;
+            let totalLoansSpentDirectly = 0;
             let totalLoansReturned = 0;
 
             const activeMonthKey = state.selectedRecapMonth || getCurrentMonthKey();
@@ -1045,6 +1063,21 @@
                 } else if (tx.type === 'loan_received') {
                     totalLoansReceived += amt;
                     mBucket.loanReceived += amt;
+                    if (tx.usage === 'spent') {
+                        totalExpense += amt;
+                        totalLoansSpentDirectly += amt;
+                        mBucket.expense += amt;
+                        mBucket.expenseByCategory[tx.categoryId] = (mBucket.expenseByCategory[tx.categoryId] || 0) + amt;
+
+                        if (txMonthKey === activeMonthKey) {
+                            expenseByCategorySelectedMonth[tx.categoryId] = (expenseByCategorySelectedMonth[tx.categoryId] || 0) + amt;
+                        }
+                        if (txMonthKey === currentRealMonthKey) {
+                            expenseByCategoryCurrentMonth[tx.categoryId] = (expenseByCategoryCurrentMonth[tx.categoryId] || 0) + amt;
+                        }
+                    } else {
+                        totalLoansReceivedActive += amt;
+                    }
                     const rawName = (tx.lender || 'Tanpa Nama').trim();
                     const key = rawName.toLowerCase();
                     if (!creditorMap[key]) {
@@ -1112,7 +1145,7 @@
                 .sort((a, b) => b.remaining - a.remaining);
 
             const outstandingPayables = activeCreditors.reduce((acc, c) => acc + c.remaining, 0);
-            const activeCash = totalIncome - totalExpense - totalSavings - totalLoansGiven + totalLoansRepaid + totalLoansReceived - totalLoansReturned;
+            const activeCash = totalIncome - totalExpense + totalLoansSpentDirectly - totalSavings - totalLoansGiven + totalLoansRepaid + totalLoansReceivedActive - totalLoansReturned;
 
             return {
                 totalIncome,
@@ -1925,7 +1958,8 @@
                 }
             });
 
-            document.getElementById('expense-category-wrapper')?.classList.toggle('hidden', type !== 'expense');
+            const showExpenseCategory = type === 'expense' || (type === 'loan_received' && state.loanReceivedUsage === 'spent');
+            document.getElementById('expense-category-wrapper')?.classList.toggle('hidden', !showExpenseCategory);
             document.getElementById('loan-given-wrapper')?.classList.toggle('hidden', type !== 'loan_given');
             document.getElementById('loan-repaid-wrapper')?.classList.toggle('hidden', type !== 'loan_repaid');
             document.getElementById('loan-received-wrapper')?.classList.toggle('hidden', type !== 'loan_received');
@@ -1939,11 +1973,23 @@
                 submitBtn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i><span>${tabStyles[type].submitLabel}</span>`;
             }
 
-            if (type === 'expense') renderFormExpenseCategories();
+            if (showExpenseCategory) renderFormExpenseCategories();
             if (type === 'loan_given') populateBorrowersDatalist();
             if (type === 'loan_repaid') populateRepaymentSelect();
             if (type === 'loan_received') populateLendersDatalist();
             if (type === 'loan_returned') populateReturnSelect();
+            refreshIcons();
+        }
+
+        function updateLoanReceivedUsage() {
+            const selectedUsage = document.querySelector('input[name="loan-received-usage"]:checked');
+            state.loanReceivedUsage = selectedUsage?.value === 'spent' ? 'spent' : 'active';
+            const showExpenseCategory = state.formType === 'loan_received' && state.loanReceivedUsage === 'spent';
+            document.getElementById('expense-category-wrapper')?.classList.toggle(
+                'hidden',
+                state.formType !== 'expense' && !showExpenseCategory
+            );
+            if (showExpenseCategory) renderFormExpenseCategories();
             refreshIcons();
         }
 
@@ -2205,6 +2251,11 @@
                     return;
                 }
                 txRecord.lender = lenderName;
+                txRecord.usage = state.loanReceivedUsage;
+                if (txRecord.usage === 'spent') {
+                    txRecord.categoryId = state.selectedExpenseCategoryId;
+                    alertCategoryAfter = state.selectedExpenseCategoryId;
+                }
                 if (lenderInput) lenderInput.value = '';
             } else if (formType === 'loan_returned') {
                 const selectEl = document.getElementById('tx-return-select');
@@ -2241,7 +2292,7 @@
             renderAll();
 
             // Tampilkan notifikasi sesuai jenis transaksi & peringatan batas pengeluaran bulan berjalan
-            if (formType === 'expense' && alertCategoryAfter) {
+            if ((formType === 'expense' || (formType === 'loan_received' && txRecord.usage === 'spent')) && alertCategoryAfter) {
                 const metrics = calculateMetrics();
                 const cat = state.categories.find(c => c.id === alertCategoryAfter);
                 if (cat && cat.limit > 0) {
@@ -2262,10 +2313,22 @@
                             'warning'
                         );
                     } else {
-                        showToast('Pengeluaran Tercatat', `${formatRupiah(amount)} dicatat ke pos ${cat.name}.`, 'success');
+                        showToast(
+                            formType === 'loan_received' ? 'Pinjaman Langsung Dipakai' : 'Pengeluaran Tercatat',
+                            formType === 'loan_received'
+                                ? `${formatRupiah(amount)} dari pinjaman ${txRecord.lender} dicatat ke pos ${cat.name}.`
+                                : `${formatRupiah(amount)} dicatat ke pos ${cat.name}.`,
+                            'success'
+                        );
                     }
                 } else {
-                    showToast('Pengeluaran Tercatat', `${formatRupiah(amount)} berhasil disimpan.`, 'success');
+                    showToast(
+                        formType === 'loan_received' ? 'Pinjaman Langsung Dipakai' : 'Pengeluaran Tercatat',
+                        formType === 'loan_received'
+                            ? `${formatRupiah(amount)} dari pinjaman ${txRecord.lender} dicatat sebagai pengeluaran.`
+                            : `${formatRupiah(amount)} berhasil disimpan.`,
+                        'success'
+                    );
                 }
             } else if (formType === 'loan_given') {
                 showToast('Pinjaman Dicatat', `${formatRupiah(amount)} dipinjamkan ke ${txRecord.borrower}.`, 'info');
@@ -2426,13 +2489,15 @@
                     amountText = `+ ${formatRupiah(tx.amount)}`;
                     amountStyle = 'text-teal-600';
                 } else if (tx.type === 'loan_received') {
-                    title = `Pinjam dari ${tx.lender || 'Teman'}${tx.note ? ` • ${tx.note}` : ''}`;
-                    badgeText = 'Pinjam Uang';
-                    badgeStyle = 'bg-amber-50 text-amber-700 border-amber-200';
+                    const isSpent = tx.usage === 'spent';
+                    const category = state.categories.find(c => c.id === tx.categoryId);
+                    title = `Pinjam dari ${tx.lender || 'Teman'}${isSpent ? ' (langsung dipakai)' : ''}${tx.note ? ` • ${tx.note}` : ''}`;
+                    badgeText = isSpent ? `Dipakai: ${category ? category.name : 'Pengeluaran'}` : 'Pinjam Uang';
+                    badgeStyle = isSpent ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-amber-50 text-amber-700 border-amber-200';
                     iconName = 'handshake';
                     iconStyle = 'bg-amber-50 border-amber-200 text-amber-600';
-                    amountText = `+ ${formatRupiah(tx.amount)}`;
-                    amountStyle = 'text-amber-600';
+                    amountText = `${isSpent ? '- ' : '+ '}${formatRupiah(tx.amount)}`;
+                    amountStyle = isSpent ? 'text-rose-600' : 'text-amber-600';
                 } else if (tx.type === 'loan_returned') {
                     title = `Bayar utang ke ${tx.lender || 'Teman'}${tx.note ? ` • ${tx.note}` : ''}`;
                     badgeText = 'Bayar Utang';
